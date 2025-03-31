@@ -2,7 +2,7 @@ from pymongo import MongoClient
 from datetime import datetime
 
 # Conexión a MongoDB (local por defecto, puerto 27017)
-client = MongoClient('mongodb://localhost:27017/')
+client = MongoClient('mongodb+srv://BrianSG230:KmAq8alNdVqEbCJ9@ecosorter.cjb4gde.mongodb.net/')
 db = client['EcoSorter']  # Crear o conectar a la base de datos EcoSorter
 
 # Eliminar colecciones existentes para empezar desde cero (opcional)
