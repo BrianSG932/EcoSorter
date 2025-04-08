@@ -1,4 +1,4 @@
-#app\EntrenamientoML\ModeloML.py
+#app\EntrenamientoML\ModeloML_colab.py
 
 import os
 import numpy as np
