@@ -1,19 +1,31 @@
+#modeloml.py
+import tensorflow as tf
 import numpy as np
 import cv2
-from fastapi import UploadFile
+import json
 from io import BytesIO
+from fastapi import UploadFile
+from PIL import Image
+import os
 
-# Simulación de modelo (sustituir luego por el real)
-async def predecir_residuo(imagen: UploadFile):
-    contenido = await imagen.read()
-    img_np = np.frombuffer(contenido, np.uint8)
-    imagen_cv2 = cv2.imdecode(img_np, cv2.IMREAD_COLOR)
+# Cargar el modelo entrenado
+def cargar_modelo_y_clases():
+    modelo_path = "app/models/modelo_clasificador_materiales.h5"
+    modelo = tf.keras.models.load_model(modelo_path)
+    with open("app/models/clases.json", "r") as f:
+        clases = json.load(f)
+    return modelo, clases
 
-    # Aquí va la lógica real del modelo
-    resultado = "plástico PET"
-    confianza = 0.93
+IMG_SIZE = (64, 64)
 
-    return {
-        "material": resultado,
-        "confianza": confianza
-    }
+def predecir_imagen(ruta_imagen, modelo, clases):
+    IMG_SIZE = (64, 64)
+    img = Image.open(ruta_imagen).convert("RGB")
+    img = img.resize(IMG_SIZE)
+    img_array = np.array(img) / 255.0
+    img_array = np.expand_dims(img_array, axis=0)
+    prediccion = modelo.predict(img_array)[0]
+    idx = int(np.argmax(prediccion))
+    clase = clases[idx]
+    confianza = float(prediccion[idx])
+    return {"material": clase, "confianza": round(confianza * 100, 2)}

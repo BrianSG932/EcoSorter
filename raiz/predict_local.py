@@ -1,6 +1,11 @@
+
+#predict_local.py
 import numpy as np
 import cv2
-from tensorflow.keras.models import load_model
+#import tensorflow as tf
+import keras
+from keras.models import load_model
+
 
 # === CONFIGURACIÓN ===
 MODEL_PATH = "app/models/modelo_clasificador_materiales.h5"

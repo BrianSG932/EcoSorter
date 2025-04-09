@@ -1,4 +1,4 @@
-#mongoDB(EcoSorter)/ConexionBD.py
+#EcoSorter/MongoDB(EcoSorter)/ConexionBD.py -conexion a MongoDB y creación de colecciones con datos iniciales
 from pymongo import MongoClient
 from datetime import datetime
 
