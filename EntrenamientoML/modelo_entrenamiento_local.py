@@ -9,7 +9,7 @@ import datetime
 import json
 
 # Ruta local al dataset
-DATASET_PATH = "G:/Mi unidad/EcoSorter/archive/realwaste-main/RealWaste"
+DATASET_PATH = "G:\Mi unidad\EcoSorter\archive\realwaste-main\RealWaste"
 IMG_SIZE = (64, 64)
 
 # Verificar que la ruta existe
