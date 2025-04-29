@@ -2,6 +2,8 @@
 import flet as ft
 from utils import capture_image, classify_image
 import os
+import base64
+import shutil 
 
 def main(page: ft.Page):
     page.title = "EcoSorter Mobile"
@@ -14,23 +16,41 @@ def main(page: ft.Page):
     def on_capture_click(e):
         try:
             path = capture_image()
-            image_view.src = path
+
+            # Crea carpeta temp si no existe
+            if not os.path.exists("temp"):
+                os.makedirs("temp")
+
+            # Copia la imagen a ./temp/ con nombre único
+            final_path = os.path.join("temp", os.path.basename(path))
+            shutil.copy(path, final_path)
+
+            # Mostrar imagen con ruta accesible para Flet
+            image_view.src = f"/temp/{os.path.basename(path)}"
+
             page.update()
             result_text.value = "Clasificando..."
             page.update()
 
             result = classify_image(path)
-            # Limpia el archivo temporal
-            os.remove(path)
 
             mat = result["clase_predicha"]["material"]
             conf = result["clase_predicha"]["confianza"]
             result_text.value = f"Material: {mat}\nConfianza: {conf}%"
+
+            # Puedes eliminar si ya no necesitas los archivos
+            # os.remove(path)
+
         except Exception as err:
             result_text.value = f"Error: {err}"
+
         page.update()
 
+        #os.remove(path)
+
     capture_btn = ft.ElevatedButton("Tomar foto y clasificar", on_click=on_capture_click)
+
+    
 
     page.add(
         ft.Column([
@@ -41,4 +61,5 @@ def main(page: ft.Page):
     )
 
 if __name__ == "__main__":
-    ft.app(target=main)  # Puedes usar MOBILE_BROWSER o NATIVE si lo configuras
+    ft.app(target=main, view=ft.WEB_BROWSER)
+  # Puedes usar MOBILE_BROWSER o NATIVE si lo configuras
