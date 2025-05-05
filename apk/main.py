@@ -17,6 +17,7 @@ class AppNavigator:
             "map": lambda: MapScreen(self.page, self, self.auth_manager),
             "stats": lambda: StatsScreen(self.page, self, self.auth_manager)
         }
+        self.page.theme_mode = ft.ThemeMode.LIGHT
         self.navigate("login")
 
     def navigate(self, screen_name):
@@ -27,81 +28,107 @@ class AppNavigator:
             self.page.add(ft.Text("Pantalla no encontrada"))
         self.page.update()
 
+    def toggle_theme(self, e):
+        self.page.theme_mode = ft.ThemeMode.DARK if self.page.theme_mode == ft.ThemeMode.LIGHT else ft.ThemeMode.LIGHT
+        self.page.update()
+
     def show_home(self):
         self.page.clean()
         self.page.title = "Clasificador de Basura - Inicio"
 
         welcome_text = ft.Text(
             "Bienvenido al Clasificador de Basura",
-            size=30,
+            size=34,
             weight=ft.FontWeight.BOLD,
-            color=ft.Colors.BLACK
+            color=ft.Colors.BLACK,
+            font_family="Roboto"
         )
 
-        classify_button = ft.ElevatedButton(
-            text="Clasificar Residuos",
-            icon=ft.Icons.RECYCLING,
-            on_click=lambda e: self.navigate("classify"),
-            width=300,
-            bgcolor=ft.Colors.GREEN_600,
-            color=ft.Colors.WHITE
-        )
+        def create_icon_button(icon, color, on_click, tooltip, label):
+            return ft.Card(
+                content=ft.Column([
+                    ft.IconButton(
+                        icon=icon,
+                        icon_color=ft.Colors.WHITE,
+                        style=ft.ButtonStyle(
+                            bgcolor=color,
+                            shape=ft.CircleBorder(),
+                            elevation=2
+                        ),
+                        on_click=on_click,
+                        tooltip=tooltip,
+                        width=60,
+                        height=60,
+                        animate_scale=True,
+                        scale=1.0
+                    ),
+                    ft.Text(label, size=14, color=ft.Colors.BLACK54, text_align=ft.TextAlign.CENTER, max_lines=2)
+                ], alignment=ft.MainAxisAlignment.CENTER, spacing=8),
+                elevation=4
+            )
 
-        map_button = ft.ElevatedButton(
-            text="Ver Mapa de Reciclaje",
-            icon=ft.Icons.MAP,
-            on_click=lambda e: self.navigate("map"),
-            width=300,
-            bgcolor=ft.Colors.BLUE_600,
-            color=ft.Colors.WHITE
-        )
+        # Navigation icons in a responsive row
+        icon_row = ft.ResponsiveRow([
+            ft.Column(col={"sm": 12, "md": 2.4}, controls=[
+                create_icon_button(
+                    ft.Icons.RECYCLING, ft.Colors.GREEN_600, lambda e: self.navigate("classify"),
+                    "Clasificar Residuos", "Clasificar"
+                )
+            ]),
+            ft.Column(col={"sm": 12, "md": 2.4}, controls=[
+                create_icon_button(
+                    ft.Icons.MAP, ft.Colors.BLUE_600, lambda e: self.navigate("map"),
+                    "Ver Mapa de Reciclaje", "Mapa"
+                )
+            ]),
+            ft.Column(col={"sm": 12, "md": 2.4}, controls=[
+                create_icon_button(
+                    ft.Icons.BAR_CHART, ft.Colors.PURPLE_600, lambda e: self.navigate("stats"),
+                    "Ver Estadísticas", "Estadísticas"
+                )
+            ]),
+            ft.Column(col={"sm": 12, "md": 2.4}, controls=[
+                create_icon_button(
+                    ft.Icons.SETTINGS, ft.Colors.ORANGE_600, lambda e: self.navigate("settings"),
+                    "Configuraciones", "Config."
+                )
+            ]),
+            ft.Column(col={"sm": 12, "md": 2.4}, controls=[
+                create_icon_button(
+                    ft.Icons.LOGOUT, ft.Colors.RED_600, lambda e: self.navigate("login"),
+                    "Cerrar Sesión", "Salir"
+                )
+            ])
+        ], alignment=ft.MainAxisAlignment.CENTER, spacing=20)
 
-        stats_button = ft.ElevatedButton(
-            text="Ver Estadísticas",
-            icon=ft.Icons.BAR_CHART,
-            on_click=lambda e: self.navigate("stats"),
-            width=300,
-            bgcolor=ft.Colors.PURPLE_600,
-            color=ft.Colors.WHITE
-        )
-
-        settings_button = ft.ElevatedButton(
-            text="Configuraciones",
-            icon=ft.Icons.SETTINGS,
-            on_click=lambda e: self.navigate("settings"),
-            width=300,
-            bgcolor=ft.Colors.ORANGE_600,
-            color=ft.Colors.WHITE
-        )
-
-        logout_button = ft.ElevatedButton(
-            text="Cerrar Sesión",
-            icon=ft.Icons.LOGOUT,
-            on_click=lambda e: self.navigate("login"),
-            width=300,
-            bgcolor=ft.Colors.RED_600,
-            color=ft.Colors.WHITE
+        # Theme switcher
+        theme_switcher = ft.IconButton(
+            icon=ft.Icons.BRIGHTNESS_4,
+            icon_color=ft.Colors.BLACK,
+            style=ft.ButtonStyle(bgcolor=None),
+            on_click=self.toggle_theme,
+            tooltip="Cambiar Tema",
+            icon_size=24,
+            width=40,
+            height=40
         )
 
         self.page.add(
             ft.Container(
                 content=ft.Column(
                     [
-                        welcome_text,
-                        ft.Text("Elige una opción:", size=20, color=ft.Colors.BLACK54),
-                        classify_button,
-                        map_button,
-                        stats_button,
-                        settings_button,
-                        logout_button
+                        ft.Row([ft.Container(expand=True), welcome_text, theme_switcher], alignment=ft.MainAxisAlignment.END),
+                        ft.Text("Elige una opción:", size=22, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK54),
+                        icon_row,
+                        ft.Container(height=30)
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                    spacing=20
+                    spacing=30
                 ),
-                padding=20,
+                padding=30,
                 bgcolor=ft.Colors.GREY_100,
-                border_radius=10
+                expand=True
             )
         )
         self.page.update()
