@@ -8,14 +8,12 @@ class StatsScreen:
         self.setup_ui()
 
     def setup_ui(self):
-        # Fetch recycling stats for the logged-in user (default: "admin")
-        username = "admin"  # Replace with actual user if auth is implemented
+        username = "admin"
         stats = self.auth_manager.users.get(username, {}).get("recycling_stats", {
             "Plástico": 0, "Papel": 0, "Vidrio": 0, "Orgánico": 0,
             "Metal": 0, "Pilas": 0, "Electrónicos": 0
         })
 
-        # Prepare bar chart data
         waste_types = list(stats.keys())
         values = list(stats.values())
         colors = [
@@ -24,7 +22,6 @@ class StatsScreen:
             ft.Colors.ORANGE_400
         ]
 
-        # Create bar chart groups (one group per waste type)
         bar_groups = [
             ft.BarChartGroup(
                 x=i,
@@ -42,7 +39,6 @@ class StatsScreen:
             for i in range(len(waste_types))
         ]
 
-        # Create bar chart
         chart = ft.BarChart(
             bar_groups=bar_groups,
             bottom_axis=ft.ChartAxis(
@@ -59,23 +55,44 @@ class StatsScreen:
             height=400
         )
 
-        # Build UI
-        self.container = ft.Column(
+        # Main content column
+        main_content = ft.Column(
             [
                 ft.Text("Estadísticas de Reciclaje", size=30, weight=ft.FontWeight.BOLD),
                 chart,
-                ft.ElevatedButton(
-                    text="Volver",
-                    on_click=lambda e: self.navigator.navigate("home"),
-                    width=300,
-                    bgcolor=ft.Colors.GREY_600,
-                    color=ft.Colors.WHITE
-                )
             ],
             alignment=ft.MainAxisAlignment.CENTER,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             spacing=20
         )
 
+        # Back arrow with no background
+        back_arrow = ft.IconButton(
+            icon=ft.Icons.ARROW_BACK,
+            icon_color=ft.Colors.BLACK,
+            style=ft.ButtonStyle(bgcolor=None),
+            on_click=lambda e: self.navigator.navigate("home"),
+            tooltip="Volver al Inicio",
+            icon_size=30,
+            width=40,
+            height=40
+        )
+
+        # Use Stack to position the back arrow in the top-left corner
         self.page.clean()
-        self.page.add(self.container)
+        self.page.add(
+            ft.Stack(
+                [
+                    main_content,
+                    ft.Container(
+                        content=back_arrow,
+                        alignment=ft.alignment.top_left,
+                        padding=ft.padding.only(left=10, top=10)
+                    )
+                ],
+                expand=True
+            )
+        )
+
+    def update(self):
+        self.page.update()

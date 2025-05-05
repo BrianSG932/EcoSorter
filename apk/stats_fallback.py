@@ -6,21 +6,19 @@ class StatsScreen:
         self.page = page
         self.navigator = navigator
         self.auth_manager = auth_manager
-        self.current_user = "admin"  # Simulación del usuario actual
+        self.current_user = "admin"
         self.setup_ui()
 
     def setup_ui(self):
         self.page.clean()
         self.page.title = "Clasificador de Basura - Estadísticas"
 
-        # Obtener estadísticas del usuario
         stats = self.auth_manager.users.get(self.current_user, {}).get("recycling_stats", {
             "Plástico": 0, "Papel": 0, "Vidrio": 0, "Orgánico": 0, "Metal": 0, "Pilas": 0, "Electrónicos": 0
         })
 
-        # Calcular impacto ambiental (CO2 ahorrado en kg)
         co2_factors = {
-            "Plástico": 2.0,  # kg de CO2 ahorrado por kg reciclado
+            "Plástico": 2.0,
             "Papel": 1.0,
             "Vidrio": 0.3,
             "Orgánico": 0.5,
@@ -31,7 +29,6 @@ class StatsScreen:
         total_co2 = sum(stats[residue] * co2_factors[residue] for residue in stats)
         total_weight = sum(stats[residue] for residue in stats)
 
-        # Lista de estadísticas
         stats_list = ft.ListView(
             controls=[
                 ft.Card(
@@ -53,32 +50,46 @@ class StatsScreen:
             expand=True
         )
 
-        # Botón de volver
-        back_button = ft.ElevatedButton(
-            text="Volver al Inicio",
-            icon=ft.Icons.HOME,
-            on_click=lambda e: self.navigator.navigate("home"),
-            width=300,
-            bgcolor=ft.Colors.BLUE_600,
-            color=ft.Colors.WHITE
+        # Main content column
+        main_content = ft.Column(
+            [
+                ft.Text("Estadísticas de Reciclaje", size=30, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
+                ft.Text("Resumen de tus esfuerzos de reciclaje.", size=16, color=ft.Colors.BLACK54),
+                ft.Text(f"Total reciclado: {total_weight:.2f} kg", size=20, weight=ft.FontWeight.BOLD),
+                ft.Text(f"CO2 ahorrado: {total_co2:.2f} kg", size=20, weight=ft.FontWeight.BOLD),
+                ft.Text("Detalles por tipo de residuo:", size=16, weight=ft.FontWeight.BOLD),
+                stats_list,
+            ],
+            alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            spacing=20
         )
 
-        # Contenedor principal
+        # Back arrow with no background
+        back_arrow = ft.IconButton(
+            icon=ft.Icons.ARROW_BACK,
+            icon_color=ft.Colors.BLACK,
+            style=ft.ButtonStyle(bgcolor=None),
+            on_click=lambda e: self.navigator.navigate("home"),
+            tooltip="Volver al Inicio",
+            icon_size=30,
+            width=40,
+            height=40
+        )
+
+        # Use Stack to position the back arrow in the top-left corner
         self.page.add(
             ft.Container(
-                content=ft.Column(
+                content=ft.Stack(
                     [
-                        ft.Text("Estadísticas de Reciclaje", size=30, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
-                        ft.Text("Resumen de tus esfuerzos de reciclaje.", size=16, color=ft.Colors.BLACK54),
-                        ft.Text(f"Total reciclado: {total_weight:.2f} kg", size=20, weight=ft.FontWeight.BOLD),
-                        ft.Text(f"CO2 ahorrado: {total_co2:.2f} kg", size=20, weight=ft.FontWeight.BOLD),
-                        ft.Text("Detalles por tipo de residuo:", size=16, weight=ft.FontWeight.BOLD),
-                        stats_list,
-                        back_button
+                        main_content,
+                        ft.Container(
+                            content=back_arrow,
+                            alignment=ft.alignment.top_left,
+                            padding=ft.padding.only(left=10, top=10)
+                        )
                     ],
-                    alignment=ft.MainAxisAlignment.CENTER,
-                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                    spacing=20
+                    expand=True
                 ),
                 padding=20,
                 bgcolor=ft.Colors.GREY_100,

@@ -6,7 +6,7 @@ class SettingsScreen:
         self.page = page
         self.navigator = navigator
         self.auth_manager = auth_manager
-        self.current_user = "admin"  # Simulación del usuario actual
+        self.current_user = "admin"
         self.setup_ui()
 
     def setup_ui(self):
@@ -143,59 +143,77 @@ class SettingsScreen:
             on_click=lambda e: self.navigator.navigate("login"),
             width=300,
             bgcolor=ft.colors.RED_600,
-            color=ft.colors.WHITE
-        )
-        self.back_button = ft.ElevatedButton(
-            text="Volver al Inicio",
-            icon=ft.icons.HOME,
-            on_click=lambda e: self.navigator.navigate("home"),
-            width=300,
-            bgcolor=ft.colors.BLUE_600,
-            color=ft.colors.WHITE
+            color=ft.Colors.WHITE
         )
 
+        # Back arrow with no background
+        back_arrow = ft.IconButton(
+            icon=ft.Icons.ARROW_BACK,
+            icon_color=ft.Colors.BLACK,
+            style=ft.ButtonStyle(bgcolor=None),
+            on_click=lambda e: self.navigator.navigate("home"),
+            tooltip="Volver al Inicio",
+            icon_size=30,
+            width=40,
+            height=40
+        )
+
+        # Main content column
+        main_content = ft.Column(
+            [
+                ft.Text("Configuraciones", size=30, weight=ft.FontWeight.BOLD, color=ft.colors.BLACK),
+                ft.Text("Personaliza tu experiencia y gestiona tu cuenta.", size=16, color=ft.colors.BLACK54),
+                ft.Divider(),
+                ft.Text("Perfil", size=20, weight=ft.FontWeight.BOLD),
+                self.user_photo,
+                ft.Row(
+                    [self.upload_photo_button, self.remove_photo_button],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    spacing=10
+                ),
+                self.username_field,
+                self.password_field,
+                ft.Divider(),
+                ft.Text("Preferencias", size=20, weight=ft.FontWeight.BOLD),
+                self.language_dropdown,
+                self.theme_dropdown,
+                self.units_dropdown,
+                ft.Divider(),
+                ft.Text("Notificaciones", size=20, weight=ft.FontWeight.BOLD),
+                self.notifications_dropdown,
+                ft.Divider(),
+                ft.Text("Mapa", size=20, weight=ft.FontWeight.BOLD),
+                self.location_field,
+                self.map_type_dropdown,
+                self.search_radius_dropdown,
+                ft.Text("Residuos Visibles en el Mapa", size=16, weight=ft.FontWeight.BOLD),
+                self.visible_residues_checklist,
+                self.message,
+                ft.Row(
+                    [self.update_account_button, self.logout_button],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    spacing=10,
+                    wrap=True
+                )
+            ],
+            alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            spacing=20
+        )
+
+        # Use Stack to position the back arrow in the top-left corner
         self.page.add(
             ft.Container(
-                content=ft.Column(
+                content=ft.Stack(
                     [
-                        ft.Text("Configuraciones", size=30, weight=ft.FontWeight.BOLD, color=ft.colors.BLACK),
-                        ft.Text("Personaliza tu experiencia y gestiona tu cuenta.", size=16, color=ft.colors.BLACK54),
-                        ft.Divider(),
-                        ft.Text("Perfil", size=20, weight=ft.FontWeight.BOLD),
-                        self.user_photo,
-                        ft.Row(
-                            [self.upload_photo_button, self.remove_photo_button],
-                            alignment=ft.MainAxisAlignment.CENTER,
-                            spacing=10
-                        ),
-                        self.username_field,
-                        self.password_field,
-                        ft.Divider(),
-                        ft.Text("Preferencias", size=20, weight=ft.FontWeight.BOLD),
-                        self.language_dropdown,
-                        self.theme_dropdown,
-                        self.units_dropdown,
-                        ft.Divider(),
-                        ft.Text("Notificaciones", size=20, weight=ft.FontWeight.BOLD),
-                        self.notifications_dropdown,
-                        ft.Divider(),
-                        ft.Text("Mapa", size=20, weight=ft.FontWeight.BOLD),
-                        self.location_field,
-                        self.map_type_dropdown,
-                        self.search_radius_dropdown,
-                        ft.Text("Residuos Visibles en el Mapa", size=16, weight=ft.FontWeight.BOLD),
-                        self.visible_residues_checklist,
-                        self.message,
-                        ft.Row(
-                            [self.update_account_button, self.logout_button, self.back_button],
-                            alignment=ft.MainAxisAlignment.CENTER,
-                            spacing=10,
-                            wrap=True
+                        main_content,
+                        ft.Container(
+                            content=back_arrow,
+                            alignment=ft.alignment.top_left,
+                            padding=ft.padding.only(left=10, top=10)
                         )
                     ],
-                    alignment=ft.MainAxisAlignment.CENTER,
-                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                    spacing=20
+                    expand=True
                 ),
                 padding=20,
                 bgcolor=ft.colors.GREY_100,
@@ -270,7 +288,7 @@ class SettingsScreen:
                 "search_radius": search_radius,
                 "visible_residues": visible_residues
             },
-            "recycling_stats": self.auth_manager.users[self.current_user].get("recycling_stats", {
+            "recycling_stats": self.auth_manager.users.get(self.current_user, {}).get("recycling_stats", {
                 "Plástico": 0, "Papel": 0, "Vidrio": 0, "Orgánico": 0, "Metal": 0, "Pilas": 0, "Electrónicos": 0
             })
         })
