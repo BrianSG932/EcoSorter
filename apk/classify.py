@@ -59,7 +59,8 @@ class ClassifyScreen:
             disabled=True
         )
 
-        self.container = ft.Column(
+        # Main content column
+        main_content = ft.Column(
             [
                 ft.Text("Clasificador de Residuos", size=30, weight=ft.FontWeight.BOLD),
                 self.image_display,
@@ -71,24 +72,41 @@ class ClassifyScreen:
                     spacing=10
                 ),
                 self.analyze_button,
-                ft.ElevatedButton(
-                    text="Volver",
-                    on_click=lambda e: self.navigator.navigate("home"),
-                    width=300,
-                    bgcolor=ft.Colors.GREY_600,
-                    color=ft.Colors.WHITE
-                )
             ],
             alignment=ft.MainAxisAlignment.CENTER,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             spacing=20
         )
 
+        # Back arrow with no background
+        back_arrow = ft.IconButton(
+            icon=ft.Icons.ARROW_BACK,
+            icon_color=ft.Colors.BLACK,
+            style=ft.ButtonStyle(bgcolor=None),
+            on_click=lambda e: self.navigator.navigate("home"),
+            tooltip="Volver al Inicio",
+            icon_size=30,
+            width=40,
+            height=40
+        )
+
+        # Use Stack to position the back arrow in the top-left corner
+        self.container = ft.Stack(
+            [
+                main_content,
+                ft.Container(
+                    content=back_arrow,
+                    alignment=ft.alignment.top_left,
+                    padding=ft.padding.only(left=10, top=10)
+                )
+            ],
+            expand=True
+        )
+
         self.page.clean()
         self.page.add(self.container)
 
     def take_photo(self, e):
-        # Simulate camera capture by opening file picker (camera not natively supported in Flet desktop)
         self.file_picker.pick_files(
             allow_multiple=False,
             file_type=ft.FilePickerFileType.IMAGE
@@ -134,21 +152,17 @@ class ClassifyScreen:
             self.page.update()
             return
 
-        # Simulated classification
         waste_types = ["Plástico", "Papel", "Vidrio", "Orgánico", "Metal", "Pilas", "Electrónicos"]
         self.classification_result = random.choice(waste_types)
-        self.confidence = random.uniform(0.7, 0.95)  # Simulated confidence score (70-95%)
+        self.confidence = random.uniform(0.7, 0.95)
 
-        # Update recycling stats in AuthManager
-        username = "admin"  # Assume logged-in user; replace with actual user if auth is implemented
+        username = "admin"
         if username in self.auth_manager.users:
             self.auth_manager.users[username]["recycling_stats"][self.classification_result] += 1
 
-        # Update UI with result and percentage
         self.result_text.value = f"Clasificado: {self.classification_result} ({self.confidence:.0%})"
         self.result_text.color = ft.Colors.GREEN
 
-        # Recycling recommendations
         recommendations = {
             "Plástico": "Lava los envases plásticos y deposítalos en el contenedor azul. Evita mezclar plásticos no reciclables.",
             "Papel": "Asegúrate de que el papel esté limpio y seco, y colócalo en el contenedor de papel/cartón.",
@@ -161,15 +175,11 @@ class ClassifyScreen:
         self.recommendation_text.value = f"Recomendación: {recommendations.get(self.classification_result, 'No hay recomendaciones disponibles.')}"
         self.recommendation_text.visible = True
 
-        # Simulate sending notification
         try:
             server_key = "YOUR_FCM_SERVER_KEY"
             fcm_token = "YOUR_FCM_TOKEN"
             if server_key != "YOUR_FCM_SERVER_KEY" and fcm_token != "YOUR_FCM_TOKEN":
-                headers = {
-                    "Authorization": f"key={server_key}",
-                    "Content-Type": "application/json"
-                }
+                headers = {"Authorization": f"key={server_key}", "Content-Type": "application/json"}
                 payload = {
                     "to": fcm_token,
                     "notification": {
@@ -177,11 +187,7 @@ class ClassifyScreen:
                         "body": f"Residuo clasificado como {self.classification_result} ({self.confidence:.0%})."
                     }
                 }
-                response = requests.post(
-                    "https://fcm.googleapis.com/fcm/send",
-                    json=payload,
-                    headers=headers
-                )
+                response = requests.post("https://fcm.googleapis.com/fcm/send", json=payload, headers=headers)
                 response.raise_for_status()
             else:
                 self.result_text.value += " (Notificación simulada)"
