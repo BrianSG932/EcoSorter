@@ -238,6 +238,37 @@ class SettingsScreen:
             ], spacing=10, alignment=ft.MainAxisAlignment.CENTER)
         )
 
+        # Help Section
+        def open_help_dialog(e):
+            self.page.dialog = ft.AlertDialog(
+                title=ft.Text("Ayuda"),
+                content=ft.Text("Para soporte técnico, contáctanos en soporte@ecosorter.com.\nVisita nuestro sitio web para más información: www.ecosorter.com"),
+                actions=[
+                    ft.TextButton("Cerrar", on_click=lambda e: self.page.close_dialog())
+                ],
+                actions_alignment=ft.MainAxisAlignment.END
+            )
+            self.page.dialog.open = True
+            self.page.update()
+
+        help_section = ft.ExpansionPanel(
+            header=ft.ListTile(title=ft.Text("Ayuda")),
+            content=ft.Column([
+                ft.Text("¿Necesitas ayuda con la aplicación?", size=16, weight=ft.FontWeight.BOLD),
+                ft.Text("Aquí tienes algunos consejos:"),
+                ft.Text("- Usa 'Clasificar' para identificar tipos de residuos."),
+                ft.Text("- Consulta el 'Mapa' para encontrar puntos de reciclaje cercanos."),
+                ft.Text("- Revisa tus 'Estadísticas' para ver tu impacto ambiental."),
+                ft.ElevatedButton(
+                    text="Contactar Soporte",
+                    on_click=open_help_dialog,
+                    bgcolor=ft.colors.BLUE_600,
+                    color=ft.colors.WHITE,
+                    width=150
+                )
+            ], spacing=10, alignment=ft.MainAxisAlignment.CENTER)
+        )
+
         # Logout Section
         logout_section = ft.ExpansionPanel(
             header=ft.ListTile(title=ft.Text("Cerrar Sesión")),
@@ -261,6 +292,7 @@ class SettingsScreen:
                 theme_section,
                 notifications_section,
                 map_section,
+                help_section,  # Added above logout_section
                 logout_section
             ],
             expand_icon_color=ft.colors.GREEN_600,
