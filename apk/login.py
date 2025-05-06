@@ -1,3 +1,4 @@
+#login.py
 import flet as ft
 import uuid
 
@@ -176,7 +177,7 @@ class LoginScreen:
                 width=300,
                 bgcolor=color
             ) for provider, svg_url, color in [
-                ("Google", "2504914.png", ft.Colors.BLUE_400),
+                ("Google", "F:/respaldopc/EcoSorter/apk/imagenes/2504914.png", ft.Colors.BLUE_400),
                 ("Facebook", "https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png", ft.Colors.BLUE_600),
                 ("Instagram", "https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg", ft.Colors.PINK_400),
                 ("Microsoft", "https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg", ft.Colors.BLUE_GREY_400)
@@ -187,7 +188,7 @@ class LoginScreen:
             [
                 ft.Text("Bienvenido A EcoSorter", size=30, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
                 ft.Image(
-                    src="EcoSorter Image 28 abr 2025, 10_49_20.png",
+                    src="F:/respaldopc/EcoSorter/apk/imagenes/EcoSorter Image 28 abr 2025, 10_49_20.png",
                     width=200,
                     height=200,
                     fit=ft.ImageFit.CONTAIN
