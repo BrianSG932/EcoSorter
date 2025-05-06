@@ -9,7 +9,7 @@ class MapScreen:
         self.page = page
         self.navigator = navigator
         self.auth_manager = auth_manager
-        self.current_user = "admin"  # Simulación del usuario actual
+        self.current_user = "admin"
         self.setup_ui()
 
     def setup_ui(self):
@@ -55,45 +55,61 @@ class MapScreen:
             border_radius=10
         )
 
-        self.back_button = ft.ElevatedButton(
-            text="Volver al Inicio",
-            icon=ft.icons.HOME,
+        # Back arrow with no background
+        back_arrow = ft.IconButton(
+            icon=ft.Icons.ARROW_BACK,
+            icon_color=ft.Colors.BLACK,
+            style=ft.ButtonStyle(bgcolor=None),
             on_click=lambda e: self.navigator.navigate("home"),
-            width=300,
-            bgcolor=ft.colors.BLUE_600,
-            color=ft.colors.WHITE
+            tooltip="Volver al Inicio",
+            icon_size=30,
+            width=40,
+            height=40
         )
 
-        self.page.add(
-            ft.Container(
-                content=ft.Column(
+        # Main content column
+        main_content = ft.Column(
+            [
+                ft.Text("Mapa de Centros de Reciclaje", size=30, weight=ft.FontWeight.BOLD, color=ft.colors.BLACK),
+                ft.Text("Encuentra centros de reciclaje y contenedores cercanos.", size=16, color=ft.colors.BLACK54),
+                ft.Row(
+                    [self.location_field, self.residue_filter],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    spacing=10
+                ),
+                ft.Row(
                     [
-                        ft.Text("Mapa de Centros de Reciclaje", size=30, weight=ft.FontWeight.BOLD, color=ft.colors.BLACK),
-                        ft.Text("Encuentra centros de reciclaje y contenedores cercanos.", size=16, color=ft.colors.BLACK54),
-                        ft.Row(
-                            [self.location_field, self.residue_filter],
-                            alignment=ft.MainAxisAlignment.CENTER,
-                            spacing=10
-                        ),
-                        ft.Row(
-                            [
-                                self.map_container,
-                                ft.Container(
-                                    content=self.locations_list,
-                                    width=300,
-                                    height=400,
-                                    border=ft.border.all(2, ft.colors.GREY_400),
-                                    border_radius=10
-                                )
-                            ],
-                            alignment=ft.MainAxisAlignment.CENTER,
-                            spacing=20
-                        ),
-                        self.back_button
+                        self.map_container,
+                        ft.Container(
+                            content=self.locations_list,
+                            width=300,
+                            height=400,
+                            border=ft.border.all(2, ft.colors.GREY_400),
+                            border_radius=10
+                        )
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
-                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                     spacing=20
+                ),
+            ],
+            alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            spacing=20
+        )
+
+        # Use Stack to position the back arrow in the top-left corner
+        self.page.add(
+            ft.Container(
+                content=ft.Stack(
+                    [
+                        main_content,
+                        ft.Container(
+                            content=back_arrow,
+                            alignment=ft.alignment.top_left,
+                            padding=ft.padding.only(left=10, top=10)
+                        )
+                    ],
+                    expand=True
                 ),
                 padding=20,
                 bgcolor=ft.colors.GREY_100,
@@ -105,7 +121,7 @@ class MapScreen:
         self.page.update()
 
     def get_recycling_centers(self, location, radius):
-        api_key = "YOUR_GOOGLE_MAPS_API_KEY"  # Reemplaza con tu clave de API
+        api_key = "YOUR_GOOGLE_MAPS_API_KEY"
         geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?address={location}&key={api_key}"
         geocode_response = requests.get(geocode_url).json()
         if geocode_response["status"] != "OK":
@@ -146,13 +162,13 @@ class MapScreen:
         if residue_type != "all" and residue_type not in visible_residues:
             locations = [loc for loc in locations if residue_type in loc["residues"]]
 
-        center_coords = [19.432, -99.135]  # Default: Ciudad de México
+        center_coords = [19.432, -99.135]
         if "nueva york" in location.lower():
             center_coords = [40.7128, -74.0060]
         elif "londres" in location.lower():
             center_coords = [51.5074, -0.1278]
 
-        api_key = "YOUR_GOOGLE_MAPS_API_KEY"  # Reemplaza con tu clave de API
+        api_key = "YOUR_GOOGLE_MAPS_API_KEY"
         map_html = f"""
         <!DOCTYPE html>
         <html>
@@ -188,7 +204,7 @@ class MapScreen:
                                 Dirección: ${{loc.address}}<br>
                                 Horarios: ${{loc.hours}}<br>
                                 Residuos: ${{loc.residues.join(", ")}}<br>
-                                <button onclick="showDirections(${center_coords[0]}, ${center_coords[1]}, ${{loc.coords[0]}}, ${{loc.coords[1]}})">Mostrar Ruta</button>
+                                <button onclick="showDirections({center_coords[0]}, {center_coords[1]}, ${{loc.coords[0]}}, ${{loc.coords[1]}})">Mostrar Ruta</button>
                             `,
                         }});
                         marker.addListener("click", () => {{
@@ -242,7 +258,6 @@ class MapScreen:
 
         self.auth_manager.users[self.current_user]["location"] = self.location_field.value
 
-        # Enviar notificación push (si está habilitada)
         notification_freq = self.auth_manager.users.get(self.current_user, {}).get("notifications", "daily")
         if notification_freq != "off" and locations:
             nearest_center = locations[0]["name"]
@@ -254,9 +269,9 @@ class MapScreen:
         self.page.update()
 
     def send_push_notification(self, title, body):
-        api_key = "YOUR_FCM_SERVER_KEY"  # Reemplaza con tu clave de servidor de Firebase
+        api_key = "YOUR_FCM_SERVER_KEY"
         push_service = FCMNotification(api_key=api_key)
-        registration_id = "YOUR_FCM_TOKEN"  # Reemplaza con el token del dispositivo (para pruebas)
+        registration_id = "YOUR_FCM_TOKEN"
 
         try:
             result = push_service.notify_single_device(
@@ -267,5 +282,4 @@ class MapScreen:
             print(f"Notificación enviada: {result}")
         except Exception as e:
             print(f"Error al enviar notificación: {e}")
-            # Simular notificación en UI para pruebas en escritorio
             self.page.show_snack_bar(ft.SnackBar(ft.Text(f"Notificación: {title} - {body}")))
