@@ -1,9 +1,11 @@
+#main.py
 import flet as ft
 from login import LoginScreen, AuthManager
 from classify import ClassifyScreen
 from settings import SettingsScreen
 from map import MapScreen
 from stats import StatsScreen
+from camara import camara_component
 
 class AppNavigator:
     def __init__(self, page: ft.Page):
@@ -15,7 +17,8 @@ class AppNavigator:
             "classify": lambda: ClassifyScreen(self.page, self, self.auth_manager),
             "settings": lambda: SettingsScreen(self.page, self, self.auth_manager),
             "map": lambda: MapScreen(self.page, self, self.auth_manager),
-            "stats": lambda: StatsScreen(self.page, self, self.auth_manager)
+            "stats": lambda: StatsScreen(self.page, self, self.auth_manager),
+            "camara": lambda: camara_component(self, self.auth_manager)(self.page)
         }
         self.navigate("login")
 

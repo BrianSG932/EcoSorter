@@ -1,9 +1,13 @@
+#classify.py
 import flet as ft
 import random
 import requests
 import base64
 import io
 from PIL import Image
+from camara import camara_component
+from utils import classify_image
+
 
 class ClassifyScreen:
     def __init__(self, page: ft.Page, navigator, auth_manager):
@@ -38,7 +42,7 @@ class ClassifyScreen:
 
         self.take_photo_button = ft.ElevatedButton(
             text="Tomar Foto",
-            on_click=self.take_photo,
+            on_click=lambda e: self.navigator.navigate("camara"),
             width=145,
             bgcolor=ft.Colors.GREEN_600,
             color=ft.Colors.WHITE
@@ -104,6 +108,7 @@ class ClassifyScreen:
         if e.files:
             self.image_path = e.files[0].path
             try:
+                # Mostrar vista previa de imagen
                 with open(self.image_path, "rb") as f:
                     img = Image.open(f)
                     img = img.resize((300, 300))
@@ -111,19 +116,37 @@ class ClassifyScreen:
                     img.save(buffered, format="PNG")
                     img_base64 = base64.b64encode(buffered.getvalue()).decode()
                     self.image_display.src_base64 = img_base64
-                    self.result_text.value = "Imagen cargada. Toca 'Analizar Imagen' para clasificar."
+                    self.result_text.value = "Clasificando..."
                     self.result_text.color = ft.Colors.BLACK
-                    self.recommendation_text.visible = False
-                    self.analyze_button.disabled = False
                     self.page.update()
+
+                # Clasificación real vía API
+                resultado = classify_image(self.image_path)
+                material = resultado["clase_predicha"]["material"]
+                confianza = resultado["clase_predicha"]["confianza"]
+
+                self.result_text.value = f"Clasificado: {material} ({confianza}%)"
+                self.result_text.color = ft.Colors.GREEN
+
+                # Mostrar recomendación si aplica
+                recomendaciones = {
+                    "Plástico": "Lava los envases plásticos...",
+                    "Papel": "Asegúrate de que el papel esté limpio...",
+                    "Vidrio": "Deposita botellas y frascos...",
+                    "Orgánico": "Coloca los residuos orgánicos...",
+                    "Metal": "Limpia latas y envases metálicos...",
+                    "Pilas": "Lleva las pilas a un punto de recolección...",
+                    "Electrónicos": "Entrega dispositivos electrónicos..."
+                }
+
+                self.recommendation_text.value = f"Recomendación: {recomendaciones.get(material, 'No hay recomendación disponible.')}"
+                self.recommendation_text.visible = True
+
             except Exception as ex:
-                self.result_text.value = f"Error al cargar la imagen: {str(ex)}"
+                self.result_text.value = f"Error: {str(ex)}"
                 self.result_text.color = ft.Colors.RED
                 self.recommendation_text.visible = False
-                self.analyze_button.disabled = True
-                self.page.update()
-        else:
-            self.analyze_button.disabled = True
+
             self.page.update()
 
     def classify_image(self, e):
