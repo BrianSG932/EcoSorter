@@ -1,5 +1,8 @@
 import flet as ft
 import uuid
+import re
+import random
+import string
 
 class AuthManager:
     def __init__(self):
@@ -27,10 +30,11 @@ class AuthManager:
                     "Pilas": 0,
                     "Electrónicos": 0
                 },
-                "fcm_token": ""  # Token para notificaciones push (vacío por defecto)
+                "fcm_token": ""
             }
         }
         self.reset_requests = {}
+        self.verification_codes = {}  # Store 2FA and email verification codes
 
     def register_user(self, username, password, email):
         if username in self.users:
@@ -84,6 +88,17 @@ class AuthManager:
                     return True, "Contraseña actualizada"
         return False, "Código o email inválidos"
 
+    def generate_verification_code(self, username):
+        code = ''.join(random.choices(string.digits, k=6))  # Generate a 6-digit code
+        self.verification_codes[username] = code
+        return code
+
+    def verify_code(self, username, code):
+        if username in self.verification_codes and self.verification_codes[username] == code:
+            del self.verification_codes[username]  # Clear code after verification
+            return True
+        return False
+
 class LoginScreen:
     def __init__(self, page: ft.Page, navigator=None):
         self.page = page
@@ -93,8 +108,25 @@ class LoginScreen:
         self.page.vertical_alignment = ft.MainAxisAlignment.CENTER
         self.page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
         self.current_view = "login"
-        self.password_visible = False  # Estado para controlar visibilidad de contraseña
+        self.password_visible = False
         self.setup_ui()
+
+    def check_password_strength(self, password):
+        if len(password) < 8:
+            return False, "La contraseña debe tener al menos 8 caracteres"
+        if not re.search(r"[A-Z]", password):
+            return False, "La contraseña debe tener al menos una letra mayúscula"
+        if not re.search(r"[a-z]", password):
+            return False, "La contraseña debe tener al menos una letra minúscula"
+        if not re.search(r"[0-9]", password):
+            return False, "La contraseña debe tener al menos un número"
+        if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+            return False, "La contraseña debe tener al menos un carácter especial"
+        return True, "Contraseña válida"
+
+    def validate_email(self, email):
+        pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+        return re.match(pattern, email) is not None
 
     def setup_ui(self):
         self.username_field = ft.TextField(label="Usuario", width=300)
@@ -107,8 +139,20 @@ class LoginScreen:
                 on_click=self.toggle_password_visibility
             )
         )
+        self.confirm_password_field = ft.TextField(
+            label="Confirmar Contraseña",
+            password=True,
+            width=300,
+            visible=False,
+            suffix_icon=ft.IconButton(
+                icon=ft.Icons.VISIBILITY_OFF,
+                on_click=self.toggle_confirm_password_visibility
+            )
+        )
         self.email_field = ft.TextField(label="Email", width=300, visible=False)
         self.reset_code_field = ft.TextField(label="Código de recuperación", width=300, visible=False)
+        self.verification_code_field = ft.TextField(label="Código de verificación", width=300, visible=False)
+
         self.message = ft.Text(value="", color=ft.Colors.RED, visible=False)
 
         self.login_button = ft.ElevatedButton(
@@ -140,6 +184,22 @@ class LoginScreen:
             width=300,
             visible=False,
             bgcolor=ft.Colors.GREEN_600,
+            color=ft.Colors.WHITE
+        )
+        self.verify_email_button = ft.ElevatedButton(
+            text="Verificar Email",
+            on_click=self.verify_email,
+            width=300,
+            visible=False,
+            bgcolor=ft.Colors.GREEN_600,
+            color=ft.Colors.WHITE
+        )
+        self.verify_2fa_button = ft.ElevatedButton(
+            text="Verificar 2FA",
+            on_click=self.verify_2fa,
+            width=300,
+            visible=False,
+            bgcolor=ft.Colors.BLUE_600,
             color=ft.Colors.WHITE
         )
 
@@ -195,12 +255,16 @@ class LoginScreen:
                 self.email_field,
                 self.username_field,
                 self.password_field,
+                self.confirm_password_field,
                 self.reset_code_field,
+                self.verification_code_field,
+                self.message,
                 self.login_button,
                 self.register_button,
                 self.request_reset_button,
                 self.reset_password_button,
-                self.message,
+                self.verify_email_button,
+                self.verify_2fa_button,
                 ft.Row(
                     [self.to_register_button, self.to_reset_button],
                     alignment=ft.MainAxisAlignment.CENTER
@@ -225,28 +289,44 @@ class LoginScreen:
         self.password_field.suffix_icon.icon = ft.Icons.VISIBILITY if self.password_visible else ft.Icons.VISIBILITY_OFF
         self.page.update()
 
+    def toggle_confirm_password_visibility(self, e):
+        self.confirm_password_visible = not getattr(self, 'confirm_password_visible', False)
+        self.confirm_password_field.password = not self.confirm_password_visible
+        self.confirm_password_field.suffix_icon.icon = ft.Icons.VISIBILITY if self.confirm_password_visible else ft.Icons.VISIBILITY_OFF
+        self.page.update()
+
     def switch_view(self, view):
         self.current_view = view
         self.message.visible = False
         self.password_visible = False
         self.password_field.password = True
         self.password_field.suffix_icon.icon = ft.Icons.VISIBILITY_OFF
+        self.confirm_password_visible = False
+        self.confirm_password_field.password = True
+        self.confirm_password_field.suffix_icon.icon = ft.Icons.VISIBILITY_OFF
         self.update_view()
 
     def update_view(self):
         is_login = self.current_view == "login"
         is_register = self.current_view == "register"
         is_reset = self.current_view == "reset"
+        is_verify_email = self.current_view == "verify_email"
+        is_verify_2fa = self.current_view == "verify_2fa"
 
         self.username_field.visible = is_login or is_register
         self.password_field.visible = is_login or is_register or is_reset
         self.password_field.label = "Nueva Contraseña" if is_reset else "Contraseña"
+        self.confirm_password_field.visible = is_register
         self.email_field.visible = is_register or is_reset
         self.reset_code_field.visible = is_reset
+        self.verification_code_field.visible = is_verify_email or is_verify_2fa
+        self.verification_code_field.label = "Código de 2FA" if is_verify_2fa else "Código de verificación"
         self.login_button.visible = is_login
         self.register_button.visible = is_register
         self.request_reset_button.visible = is_reset and not self.reset_code_field.value
         self.reset_password_button.visible = is_reset and self.reset_code_field.value
+        self.verify_email_button.visible = is_verify_email
+        self.verify_2fa_button.visible = is_verify_2fa
         self.to_register_button.visible = is_login
         self.to_reset_button.visible = is_login
         self.to_login_button.visible = not is_login
@@ -254,15 +334,69 @@ class LoginScreen:
         self.page.update()
 
     def validate_login(self, e):
+        # Password strength check
+        is_strong, message = self.check_password_strength(self.password_field.value)
+        if not is_strong:
+            self.message.value = message
+            self.message.color = ft.Colors.RED
+            self.message.visible = True
+            self.page.update()
+            return
+
+        # Login attempt
         success, msg = self.auth_manager.login_user(self.username_field.value, self.password_field.value)
         self.message.value = msg
         self.message.color = ft.Colors.GREEN if success else ft.Colors.RED
         self.message.visible = True
         self.page.update()
         if success and self.navigator:
+            # Start 2FA process
+            code = self.auth_manager.generate_verification_code(self.username_field.value)
+            self.message.value = f"Código 2FA enviado: {code} (simulado)"
+            self.message.color = ft.Colors.BLUE
+            self.switch_view("verify_2fa")
+
+    def verify_2fa(self, e):
+        username = self.username_field.value
+        code = self.verification_code_field.value
+        if self.auth_manager.verify_code(username, code):
+            self.message.value = "2FA verificado con éxito"
+            self.message.color = ft.Colors.GREEN
+            self.message.visible = True
             self.navigator.navigate("home")
+        else:
+            self.message.value = "Código 2FA incorrecto"
+            self.message.color = ft.Colors.RED
+            self.message.visible = True
+        self.page.update()
 
     def register_user(self, e):
+        # Email validation
+        if not self.validate_email(self.email_field.value):
+            self.message.value = "Formato de email inválido"
+            self.message.color = ft.Colors.RED
+            self.message.visible = True
+            self.page.update()
+            return
+
+        # Password strength check
+        is_strong, message = self.check_password_strength(self.password_field.value)
+        if not is_strong:
+            self.message.value = message
+            self.message.color = ft.Colors.RED
+            self.message.visible = True
+            self.page.update()
+            return
+
+        # Password confirmation
+        if self.password_field.value != self.confirm_password_field.value:
+            self.message.value = "Las contraseñas no coinciden"
+            self.message.color = ft.Colors.RED
+            self.message.visible = True
+            self.page.update()
+            return
+
+        # Register user
         success, msg = self.auth_manager.register_user(
             self.username_field.value, self.password_field.value, self.email_field.value
         )
@@ -270,7 +404,25 @@ class LoginScreen:
         self.message.color = ft.Colors.GREEN if success else ft.Colors.RED
         self.message.visible = True
         if success:
+            # Simulate email verification
+            code = self.auth_manager.generate_verification_code(self.username_field.value)
+            self.message.value = f"Código de verificación enviado: {code} (simulado)"
+            self.message.color = ft.Colors.BLUE
+            self.switch_view("verify_email")
+        self.page.update()
+
+    def verify_email(self, e):
+        username = self.username_field.value
+        code = self.verification_code_field.value
+        if self.auth_manager.verify_code(username, code):
+            self.message.value = "Email verificado con éxito"
+            self.message.color = ft.Colors.GREEN
+            self.message.visible = True
             self.switch_view("login")
+        else:
+            self.message.value = "Código de verificación incorrecto"
+            self.message.color = ft.Colors.RED
+            self.message.visible = True
         self.page.update()
 
     def request_reset(self, e):
@@ -285,6 +437,15 @@ class LoginScreen:
         self.page.update()
 
     def reset_password(self, e):
+        # Password strength check for reset
+        is_strong, message = self.check_password_strength(self.password_field.value)
+        if not is_strong:
+            self.message.value = message
+            self.message.color = ft.Colors.RED
+            self.message.visible = True
+            self.page.update()
+            return
+
         success, msg = self.auth_manager.reset_password(
             self.email_field.value, self.reset_code_field.value, self.password_field.value
         )
@@ -302,11 +463,3 @@ class LoginScreen:
         self.page.update()
         if self.navigator:
             self.navigator.navigate("home")
-
-def main(page: ft.Page):
-    page.vertical_alignment = ft.MainAxisAlignment.CENTER
-    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
-    app_navigator = AppNavigator(page)
-
-if __name__ == "__main__":
-    ft.app(target=main)
