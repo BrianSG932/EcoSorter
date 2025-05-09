@@ -7,6 +7,8 @@ from map import MapScreen
 from stats import StatsScreen
 from camara import camara_component
 
+import camarav2 as camara
+
 class AppNavigator:
     def __init__(self, page: ft.Page):
         self.page = page
@@ -23,6 +25,17 @@ class AppNavigator:
         self.page.theme_mode = ft.ThemeMode.LIGHT
         self.current_screen = "home"
         self.navigate("login")
+
+
+
+    def capturar_y_mostrar(self, e):
+        try:
+            base64img = camara.capturar_frame_base64()  # función que debes definir fuera de la clase
+            self.camera_display.src_base64 = base64img
+            self.page.update()
+        except Exception as ex:
+            print("Error capturando imagen:", ex)
+
 
     def navigate(self, screen_name):
         if screen_name in self.screens:
@@ -51,30 +64,23 @@ class AppNavigator:
         )
 
         # Camera placeholder rectangle
-        camera_rect = ft.Container(
+        self.camera_display = ft.Image(
             width=300,
             height=200,
-            bgcolor=ft.Colors.GREY_300,
-            border_radius=10,
-            content=ft.Text("Cámara Habilitada", text_align=ft.TextAlign.CENTER, color=ft.Colors.BLACK54),
-            alignment=ft.alignment.center
+            fit=ft.ImageFit.COVER,
+            #bgcolor=ft.Colors.GREY_300,
+            #border_radius=10,
+            #content=ft.Text("Cámara Habilitada", text_align=ft.TextAlign.CENTER, color=ft.Colors.BLACK54),
+            #alignment=ft.alignment.center
         )
 
         # Camera icon button at top center
         camera_button = ft.IconButton(
-            icon=ft.Icons.CAMERA,
-            icon_color=ft.Colors.WHITE,
-            style=ft.ButtonStyle(
-                bgcolor=ft.Colors.GREEN_600,
-                shape=ft.CircleBorder(),
-                elevation=2
-            ),
-            on_click=lambda e: self.start_classification(),
-            width=70,
-            height=70,
-            animate_scale=True,
-            scale=1.0
+            icon=ft.icons.CAMERA_ALT,
+            bgcolor=ft.Colors.GREEN,
+            on_click=self.capturar_y_mostrar
         )
+
 
         # Bottom navigation bar
         def create_nav_button(icon, label, screen, is_active):
@@ -137,7 +143,7 @@ class AppNavigator:
                     [
                         ft.Row([welcome_text, theme_switcher], alignment=ft.MainAxisAlignment.CENTER),
                         ft.Container(height=20),
-                        camera_rect,
+                        self.camera_display,
                         ft.Container(height=20),
                         ft.Row([camera_button], alignment=ft.MainAxisAlignment.CENTER),
                         ft.Container(height=30),

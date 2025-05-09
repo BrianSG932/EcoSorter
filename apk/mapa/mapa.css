@@ -1,0 +1,22 @@
+/* Contenedor principal */
+.main-container {
+    display: flex; /* Diseño en fila */
+    justify-content: space-between; /* Espacio entre secciones */
+    padding: 200px 15%; /* Márgenes internos */
+    align-items: flex-start; /* Alineación vertical */
+}
+
+/* Contenedor del mapa */
+.map-container {
+    flex: 1; /* Ocupa todo el espacio disponible */
+    height: 400px; /* Altura fija */
+    border: 1px solid #ccc; /* Borde gris */
+    border-radius: 5px; /* Esquinas redondeadas */
+    overflow: hidden; /* Oculta contenido que se desborde */
+}
+
+/* Estilo del mapa */
+#map {
+    width: 100%; /* Ocupa todo el ancho */
+    height: 100%; /* Ocupa toda la altura */
+}
