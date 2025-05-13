@@ -6,9 +6,11 @@ import '/services/api_service.dart'; // si usas un archivo externo para la funci
 import 'classify_result_screen.dart';
 
 class CameraScreen extends StatefulWidget {
+  const CameraScreen({super.key});  // ← importante para rutas
   @override
   _CameraScreenState createState() => _CameraScreenState();
 }
+
 
 class _CameraScreenState extends State<CameraScreen> {
   final picker = ImagePicker();
