@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
-
+import 'screens/map_screen.dart';
 import 'screens/stats_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/camera_screen.dart';
@@ -26,7 +26,7 @@ class EcoSorterApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginScreen(),
         '/home': (context) => const HomeScreen(),
-       
+        '/map': (context) => const MapScreen(),
         '/stats': (context) => const StatsScreen(),
         '/settings': (context) => const SettingsScreen(),
         '/camera': (context) => const CameraScreen(),
