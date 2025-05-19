@@ -1,4 +1,4 @@
-#clasificador.py
+#clasificador.py api
 from fastapi import APIRouter, UploadFile, File
 from app.services.modelo_ml import cargar_modelo_y_clases, predecir_imagen
 import shutil

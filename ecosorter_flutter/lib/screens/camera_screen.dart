@@ -15,49 +15,59 @@ class CameraScreen extends StatefulWidget {
 class _CameraScreenState extends State<CameraScreen> {
   final picker = ImagePicker();
   File? _image;
-  String result = '';
+  bool _loading = false;             // ← nuevo
 
   Future<void> _getImage() async {
     final pickedFile = await picker.pickImage(source: ImageSource.camera);
-    if (pickedFile != null) {
-      setState(() {
-        _image = File(pickedFile.path);
-      });
 
-    final classification = await classifyImage(_image!);
+    if (pickedFile == null) return;
 
+    setState(() {
+      _image   = File(pickedFile.path);
+      _loading = true;
+    });
+
+    try {
+      final classification = await classifyImage(_image!);
+
+      if (!mounted) return;
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ClassifyResultScreen(
+          builder: (_) => ClassifyResultScreen(
             imageFile: _image!,
             result: classification,
           ),
         ),
       );
-
-
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Clasificador de Residuos")),
+      appBar: AppBar(title: const Text("Clasificador de Residuos")),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _image != null
                 ? Image.file(_image!, width: 300, height: 300)
-                : Icon(Icons.camera_alt, size: 100),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _getImage,
-              child: Text("Capturar Imagen"),
-            ),
-            SizedBox(height: 20),
-            Text(result, textAlign: TextAlign.center),
+                : const Icon(Icons.camera_alt, size: 100),
+            const SizedBox(height: 20),
+            _loading
+                ? const CircularProgressIndicator()
+                : ElevatedButton(
+                    onPressed: _getImage,
+                    child: const Text("Capturar Imagen"),
+                  ),
           ],
         ),
       ),
