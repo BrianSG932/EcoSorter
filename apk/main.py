@@ -6,7 +6,7 @@ from settings import SettingsScreen
 from map import MapScreen
 from stats import StatsScreen
 from camara import camara_component
-
+from flet import IconButton, icons
 import camarav2 as camara
 
 class AppNavigator:
@@ -76,7 +76,7 @@ class AppNavigator:
 
         # Camera icon button at top center
         camera_button = ft.IconButton(
-            icon=ft.icons.CAMERA_ALT,
+            icon=ft.icons.CAMERA_ALT ,
             bgcolor=ft.Colors.GREEN,
             on_click=self.capturar_y_mostrar
         )
