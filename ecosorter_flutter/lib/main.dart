@@ -7,6 +7,7 @@ import 'screens/stats_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/camera_screen.dart';
 
+
 void main() {
   runApp(const EcoSorterApp());
 }
