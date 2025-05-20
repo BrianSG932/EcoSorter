@@ -6,11 +6,10 @@ import '/services/api_service.dart'; // si usas un archivo externo para la funci
 import 'classify_result_screen.dart';
 
 class CameraScreen extends StatefulWidget {
-  const CameraScreen({super.key});  // ← importante para rutas
+  const CameraScreen({super.key}); // ← importante para rutas
   @override
   _CameraScreenState createState() => _CameraScreenState();
 }
-
 
 class _CameraScreenState extends State<CameraScreen> {
   final picker = ImagePicker();
@@ -20,7 +19,11 @@ class _CameraScreenState extends State<CameraScreen> {
   Future<void> _getImage() async {
     final pickedFile = await picker.pickImage(source: ImageSource.camera);
 
+<<<<<<< HEAD
+      final classification = await classifyImage(_image!);
+=======
     if (pickedFile == null) return;
+>>>>>>> 5db0d862a18e5dc39fc1ac2bbb857d29f37c5be8
 
     setState(() {
       _image   = File(pickedFile.path);
@@ -40,6 +43,8 @@ class _CameraScreenState extends State<CameraScreen> {
           ),
         ),
       );
+<<<<<<< HEAD
+=======
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
@@ -47,6 +52,7 @@ class _CameraScreenState extends State<CameraScreen> {
       }
     } finally {
       if (mounted) setState(() => _loading = false);
+>>>>>>> 5db0d862a18e5dc39fc1ac2bbb857d29f37c5be8
     }
   }
 
@@ -62,12 +68,21 @@ class _CameraScreenState extends State<CameraScreen> {
                 ? Image.file(_image!, width: 300, height: 300)
                 : const Icon(Icons.camera_alt, size: 100),
             const SizedBox(height: 20),
+<<<<<<< HEAD
+            ElevatedButton(
+              onPressed: _getImage,
+              child: const Text("Capturar Imagen"),
+            ),
+            const SizedBox(height: 20),
+            Text(result, textAlign: TextAlign.center),
+=======
             _loading
                 ? const CircularProgressIndicator()
                 : ElevatedButton(
                     onPressed: _getImage,
                     child: const Text("Capturar Imagen"),
                   ),
+>>>>>>> 5db0d862a18e5dc39fc1ac2bbb857d29f37c5be8
           ],
         ),
       ),
