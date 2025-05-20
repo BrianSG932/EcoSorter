@@ -8,10 +8,10 @@ class ClassifyResultScreen extends StatelessWidget {
   final Map<String, dynamic> result;
 
   const ClassifyResultScreen({
-    Key? key,
+    super.key,
     required this.imageFile,
     required this.result,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

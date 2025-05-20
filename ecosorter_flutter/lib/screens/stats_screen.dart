@@ -17,13 +17,19 @@ class StatsScreen extends StatelessWidget {
             barGroups: [
               BarChartGroupData(x: 0, barRods: [
                 BarChartRodData(toY: 60, width: 20, color: Colors.green)
-              ], showingTooltipIndicators: [0]),
+              ], showingTooltipIndicators: [
+                0
+              ]),
               BarChartGroupData(x: 1, barRods: [
                 BarChartRodData(toY: 30, width: 20, color: Colors.blue)
-              ], showingTooltipIndicators: [0]),
+              ], showingTooltipIndicators: [
+                0
+              ]),
               BarChartGroupData(x: 2, barRods: [
                 BarChartRodData(toY: 80, width: 20, color: Colors.orange)
-              ], showingTooltipIndicators: [0]),
+              ], showingTooltipIndicators: [
+                0
+              ]),
             ],
             titlesData: FlTitlesData(
               bottomTitles: AxisTitles(
@@ -43,11 +49,11 @@ class StatsScreen extends StatelessWidget {
                   },
                 ),
               ),
-              leftTitles: AxisTitles(
+              leftTitles: const AxisTitles(
                 sideTitles: SideTitles(showTitles: true),
               ),
             ),
-            gridData: FlGridData(show: true),
+            gridData: const FlGridData(show: true),
             borderData: FlBorderData(show: false),
           ),
         ),
