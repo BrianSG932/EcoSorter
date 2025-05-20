@@ -1,3 +1,4 @@
+#residuos.py api
 from fastapi import APIRouter, File, UploadFile
 from app.services.modelo_ml import predecir_residuo
 

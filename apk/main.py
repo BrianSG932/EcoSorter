@@ -76,7 +76,7 @@ class AppNavigator:
 
         # Camera icon button at top center
         camera_button = ft.IconButton(
-            icon=ft.icons.CAMERA_ALT,
+            icon=ft.Icons.CAMERA_ALT ,
             bgcolor=ft.Colors.GREEN,
             on_click=self.capturar_y_mostrar
         )
