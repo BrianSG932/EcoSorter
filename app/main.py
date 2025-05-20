@@ -1,4 +1,4 @@
-#main.py
+#main.py api
 
 from fastapi import FastAPI
 from app.routes import clasificador
