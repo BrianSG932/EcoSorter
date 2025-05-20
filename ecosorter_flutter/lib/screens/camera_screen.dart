@@ -6,11 +6,10 @@ import '/services/api_service.dart'; // si usas un archivo externo para la funci
 import 'classify_result_screen.dart';
 
 class CameraScreen extends StatefulWidget {
-  const CameraScreen({super.key});  // ← importante para rutas
+  const CameraScreen({super.key}); // ← importante para rutas
   @override
   _CameraScreenState createState() => _CameraScreenState();
 }
-
 
 class _CameraScreenState extends State<CameraScreen> {
   final picker = ImagePicker();
@@ -24,7 +23,7 @@ class _CameraScreenState extends State<CameraScreen> {
         _image = File(pickedFile.path);
       });
 
-    final classification = await classifyImage(_image!);
+      final classification = await classifyImage(_image!);
 
       Navigator.push(
         context,
@@ -35,28 +34,26 @@ class _CameraScreenState extends State<CameraScreen> {
           ),
         ),
       );
-
-
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Clasificador de Residuos")),
+      appBar: AppBar(title: const Text("Clasificador de Residuos")),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _image != null
                 ? Image.file(_image!, width: 300, height: 300)
-                : Icon(Icons.camera_alt, size: 100),
-            SizedBox(height: 20),
+                : const Icon(Icons.camera_alt, size: 100),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _getImage,
-              child: Text("Capturar Imagen"),
+              child: const Text("Capturar Imagen"),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Text(result, textAlign: TextAlign.center),
           ],
         ),
