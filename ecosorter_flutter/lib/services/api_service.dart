@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 
 Future<Map<String, dynamic>> classifyImage(File image) async {
   final uri = Uri.parse(
-    'https://ideal-succotash-wrgvvx4rrj5g35jq-8000.app.github.dev/clasificador/predecir',
+    'https://fantastic-space-trout-5gxvv59ggr46c4r7x-8000.app.github.dev/clasificador/predecir',
   );
 
   final request = http.MultipartRequest('POST', uri);
