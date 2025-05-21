@@ -1,0 +1,2 @@
+C:/Users/Administrator/Documents/EcoSorter/ecosorter_flutter/android/app/.cxx/Debug/6z1u3i2l/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/Administrator/Documents/EcoSorter/ecosorter_flutter/android/app/.cxx/Debug/6z1u3i2l/x86_64/CMakeFiles/rebuild_cache.dir
