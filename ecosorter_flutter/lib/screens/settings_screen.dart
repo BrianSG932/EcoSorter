@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../screens/theme_provider.dart'; // Ajusta si lo moviste a /providers
+import 'package:permission_handler/permission_handler.dart';
+import 'package:geolocator/geolocator.dart';
+import '../screens/theme_provider.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -13,11 +15,12 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   bool notificationsEnabled = true;
   String selectedLanguage = 'es';
+  String selectedCountry = 'MX';
+  String languageCode = 'es';
 
   final Map<String, String> languageNames = {
     'es': 'Español',
     'en': 'English',
-    'fr': 'Français',
   };
 
   @override
@@ -31,6 +34,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {
       notificationsEnabled = prefs.getBool('notifications') ?? true;
       selectedLanguage = prefs.getString('language') ?? 'es';
+      selectedCountry = prefs.getString('country') ?? 'MX';
+      languageCode = selectedLanguage;
     });
   }
 
@@ -40,10 +45,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() => notificationsEnabled = value);
   }
 
-  Future<void> _saveLanguage(String value) async {
+  Future<void> _saveCountry(String country) async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setString('language', value);
-    setState(() => selectedLanguage = value);
+    selectedCountry = country;
+
+    switch (country) {
+      case 'US':
+        languageCode = 'en';
+        break;
+      default:
+        languageCode = 'es';
+    }
+
+    await prefs.setString('country', selectedCountry);
+    await prefs.setString('language', languageCode);
+
+    setState(() {
+      selectedLanguage = languageCode;
+    });
   }
 
   @override
@@ -51,30 +70,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Configuración")),
+      appBar: AppBar(
+        title: const Text("Configuración"),
+        centerTitle: true,
+      ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16.0),
         children: [
           Card(
             child: ListTile(
               leading: const Icon(Icons.person),
               title: const Text("Perfil de usuario"),
               subtitle: const Text("Ver y editar información"),
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (_) => AlertDialog(
-                    title: const Text("Perfil"),
-                    content: const Text("Funcionalidad por implementar"),
-                    actions: [
-                      TextButton(
-                        child: const Text("Cerrar"),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                );
-              },
+              onTap: () => Navigator.pushNamed(context, '/profile'),
             ),
           ),
           const SizedBox(height: 12),
@@ -90,26 +98,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Card(
             child: ListTile(
               leading: const Icon(Icons.language),
-              title: const Text("Idioma"),
+              title: const Text("Idioma actual"),
+              subtitle: Text(languageNames[selectedLanguage] ?? 'Español'),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.flag),
+              title: const Text("País / Región"),
               trailing: DropdownButton<String>(
-                value: selectedLanguage,
-                borderRadius: BorderRadius.circular(12),
+                value: selectedCountry,
                 onChanged: (value) {
                   if (value != null) {
-                    _saveLanguage(value);
+                    _saveCountry(value);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                           content: Text(
-                              'Idioma cambiado a ${languageNames[value]}')),
+                              "Idioma aplicado: ${languageCode == 'es' ? 'Español' : 'Inglés'}")),
                     );
                   }
                 },
-                items: languageNames.entries
-                    .map((entry) => DropdownMenuItem(
-                          value: entry.key,
-                          child: Text(entry.value),
-                        ))
-                    .toList(),
+                items: const [
+                  DropdownMenuItem(value: 'MX', child: Text("México")),
+                  DropdownMenuItem(value: 'US', child: Text("Estados Unidos")),
+                  DropdownMenuItem(value: 'CO', child: Text("Colombia")),
+                  DropdownMenuItem(value: 'AR', child: Text("Argentina")),
+                  DropdownMenuItem(value: 'ES', child: Text("España")),
+                ],
               ),
             ),
           ),
@@ -120,6 +136,107 @@ class _SettingsScreenState extends State<SettingsScreen> {
               title: const Text("Notificaciones"),
               value: notificationsEnabled,
               onChanged: _saveNotifications,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.location_on),
+              title: const Text("Mostrar ubicación actual"),
+              onTap: () async {
+                bool serviceEnabled =
+                    await Geolocator.isLocationServiceEnabled();
+                LocationPermission permission =
+                    await Geolocator.checkPermission();
+
+                if (permission == LocationPermission.denied) {
+                  permission = await Geolocator.requestPermission();
+                }
+
+                if (!serviceEnabled ||
+                    permission == LocationPermission.deniedForever) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text("Permiso de ubicación no disponible")),
+                  );
+                  return;
+                }
+
+                Position pos = await Geolocator.getCurrentPosition();
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text("Tu ubicación"),
+                    content:
+                        Text("Lat: ${pos.latitude}\nLng: ${pos.longitude}"),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("Cerrar"),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.verified_user),
+              title: const Text("Permisos del dispositivo"),
+              onTap: () async {
+                Map<Permission, PermissionStatus> statuses = await [
+                  Permission.camera,
+                  Permission.location,
+                  Permission.storage,
+                  Permission.notification,
+                ].request();
+
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text("Estado de permisos"),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: statuses.entries
+                          .map((e) => Text(
+                              "${e.key.toString().split('.').last}: ${e.value.name}"))
+                          .toList(),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("Cerrar"),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.help_outline),
+              title: const Text("Centro de ayuda"),
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text("Centro de ayuda"),
+                    content: const Text(
+                      "¿Tienes preguntas o necesitas soporte?\n\nEscríbenos a:\nsoporte@ecosorter.com",
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("Cerrar"),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
           const SizedBox(height: 12),
