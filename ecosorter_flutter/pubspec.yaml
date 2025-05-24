@@ -30,12 +30,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  image_picker: ^1.0.0
-  google_maps_flutter: ^2.10.1
-  fl_chart: ^0.63.0
-  http: ^1.1.0
   provider: ^6.1.2
   shared_preferences: ^2.2.2
+  permission_handler: ^11.3.0
+  geolocator: ^10.1.0
+  image_picker: ^1.0.4
+  fl_chart: ^0.63.0
+  http: ^1.1.0
+  google_maps_flutter: ^2.10.1
+  camera: ^0.10.5+9
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -63,7 +66,9 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-
+  assets:
+    - assets/images/logo_ecosorter.png
+    - assets/images/google_icon.png
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

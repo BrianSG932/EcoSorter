@@ -1,5 +1,5 @@
-//home_screen.dart
 import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -9,70 +9,103 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _currentIndex = 0;
+  int _selectedIndex = 0;
+  CameraController? _cameraController;
+  bool _isCameraInitialized = false;
 
-  final List<_NavItem> _navItems = [
-    _NavItem(icon: Icons.home, label: 'Inicio', route: '/home'),
-    _NavItem(icon: Icons.map, label: 'Mapa', route: '/map'),
-    _NavItem(icon: Icons.bar_chart, label: 'Estadísticas', route: '/stats'),
-    _NavItem(icon: Icons.settings, label: 'Ajustes', route: '/settings'),
-    _NavItem(icon: Icons.logout, label: 'Salir', route: '/login'),
+  final List<Map<String, dynamic>> _pages = [
+    {'icon': Icons.camera_alt, 'label': 'Clasificar', 'route': '/camera'},
+    {'icon': Icons.map, 'label': 'Mapa', 'route': '/map'},
+    {'icon': Icons.history, 'label': 'Historial', 'route': '/history'},
+    {'icon': Icons.settings, 'label': 'Configuración', 'route': '/settings'},
   ];
 
-  void _navigateTo(String route) {
-    Navigator.pushReplacementNamed(context, route);
+  @override
+  void initState() {
+    super.initState();
+    _initializeCamera();
+  }
+
+  Future<void> _initializeCamera() async {
+    final cameras = await availableCameras();
+    if (cameras.isNotEmpty) {
+      _cameraController = CameraController(
+        cameras.first,
+        ResolutionPreset.medium,
+        enableAudio: false,
+      );
+      await _cameraController!.initialize();
+      setState(() {
+        _isCameraInitialized = true;
+      });
+    }
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    Navigator.pushNamed(context, _pages[index]['route']);
+  }
+
+  @override
+  void dispose() {
+    _cameraController?.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("EcoSorter - Inicio"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.brightness_4),
-            onPressed: () {
-              // TODO: implementar modo oscuro
-            },
-          )
+      body: Column(
+        children: [
+          const SizedBox(height: 20),
+          const Text(
+            'Vista previa de la cámara',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
+          Expanded(
+            child: _isCameraInitialized
+                ? AspectRatio(
+                    aspectRatio: _cameraController!.value.aspectRatio,
+                    child: CameraPreview(_cameraController!),
+                  )
+                : const Center(child: CircularProgressIndicator()),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton.icon(
+              onPressed: _isCameraInitialized
+                  ? () async {
+                      final image = await _cameraController!.takePicture();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content: Text('Foto capturada: ${image.path}')),
+                      );
+                    }
+                  : null,
+              icon: const Icon(Icons.camera_alt),
+              label: const Text('Tomar Foto'),
+            ),
+          ),
         ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text("Bienvenido al Clasificador de Basura",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: () => _navigateTo('/camera'),
-              icon: const Icon(Icons.camera_alt),
-              label: const Text("Capturar imagen"),
-            ),
-          ],
-        ),
-      ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        selectedItemColor: Colors.green,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        selectedItemColor: Theme.of(context).primaryColor,
         unselectedItemColor: Colors.grey,
-        onTap: (index) {
-          setState(() => _currentIndex = index);
-          _navigateTo(_navItems[index].route);
-        },
-        items: _navItems
-            .map((item) =>
-                BottomNavigationBarItem(icon: Icon(item.icon), label: item.label))
+        items: _pages
+            .map(
+              (page) => BottomNavigationBarItem(
+                icon: Icon(page['icon']),
+                label: page['label'],
+              ),
+            )
             .toList(),
+        type: BottomNavigationBarType.fixed,
       ),
     );
   }
-}
-
-class _NavItem {
-  final IconData icon;
-  final String label;
-  final String route;
-
-  _NavItem({required this.icon, required this.label, required this.route});
 }
