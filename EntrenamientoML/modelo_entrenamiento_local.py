@@ -7,9 +7,20 @@ from sklearn.model_selection import train_test_split
 import cv2
 import datetime
 import json
+from drive_utils import authenticate_drive, download_folder
+
+
+# ID de tu carpeta pública de Google Drive
+FOLDER_ID = '1cBeF91UiYRp50STnbuBymqzsEk4DQNTj'
+DATASET_DIR = 'datasets'
+
+service = authenticate_drive()
+download_folder(service, FOLDER_ID, DATASET_DIR)
+
+DATASET_PATH = DATASET_DIR
 
 # Ruta local al dataset
-DATASET_PATH = "G:\Mi unidad\EcoSorter\archive\realwaste-main\RealWaste"
+#DATASET_PATH = "G:\Mi unidad\EcoSorter\archive\realwaste-main\RealWaste"
 IMG_SIZE = (64, 64)
 
 # Verificar que la ruta existe
@@ -72,8 +83,3 @@ output_path = "app/models/modelo_clasificador_materiales.h5"
 model.save(output_path)
 print(f"Modelo guardado en {output_path}")
 
-# Guardar las clases en JSON
-clases_path = "app/models/clases.json"
-with open(clases_path, "w") as f:
-    json.dump(clases, f)
-print(f"Clases guardadas en {clases_path}: {clases}")
