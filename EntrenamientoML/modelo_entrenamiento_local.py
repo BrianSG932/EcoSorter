@@ -10,9 +10,10 @@ import json
 from drive_utils import authenticate_drive, download_folder
 
 
+
 # ID de tu carpeta pública de Google Drive
 FOLDER_ID = '1cBeF91UiYRp50STnbuBymqzsEk4DQNTj'
-DATASET_DIR = 'datasets'
+DATASET_DIR = 'EntrenamientoML/dataset'
 
 service = authenticate_drive()
 download_folder(service, FOLDER_ID, DATASET_DIR)
@@ -81,5 +82,20 @@ os.makedirs("app/models", exist_ok=True)
 # Guardar modelo
 output_path = "app/models/modelo_clasificador_materiales.h5"
 model.save(output_path)
-print(f"Modelo guardado en {output_path}")
+print(f"✅ Modelo guardado en {output_path}")
 
+# Guardar las clases en JSON
+clases_path = "app/models/clases.json"
+with open(clases_path, "w") as f:
+    json.dump(clases, f)
+print(f"📁 Clases guardadas en {clases_path}: {clases}")
+
+# Eliminar el dataset automáticamente después de entrenar
+import shutil
+
+dataset_dir = "EntrenamientoML/dataset"
+if os.path.exists(dataset_dir):
+    shutil.rmtree(dataset_dir)
+    print(f"🧹 Carpeta '{dataset_dir}' eliminada después del entrenamiento.")
+else:
+    print(f"⚠️ Carpeta '{dataset_dir}' no encontrada para eliminar.")
