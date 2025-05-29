@@ -19,11 +19,7 @@ class _CameraScreenState extends State<CameraScreen> {
   Future<void> _getImage() async {
     final pickedFile = await picker.pickImage(source: ImageSource.camera);
 
-<<<<<<< HEAD
     if (pickedFile == null) return;
-=======
-      final classification = await classifyImage(_image!);
->>>>>>> a816461 (assa)
 
     setState(() {
       _image   = File(pickedFile.path);
@@ -43,7 +39,6 @@ class _CameraScreenState extends State<CameraScreen> {
           ),
         ),
       );
-<<<<<<< HEAD
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
@@ -51,8 +46,6 @@ class _CameraScreenState extends State<CameraScreen> {
       }
     } finally {
       if (mounted) setState(() => _loading = false);
-=======
->>>>>>> a816461 (assa)
     }
   }
 
@@ -68,21 +61,12 @@ class _CameraScreenState extends State<CameraScreen> {
                 ? Image.file(_image!, width: 300, height: 300)
                 : const Icon(Icons.camera_alt, size: 100),
             const SizedBox(height: 20),
-<<<<<<< HEAD
             _loading
                 ? const CircularProgressIndicator()
                 : ElevatedButton(
                     onPressed: _getImage,
                     child: const Text("Capturar Imagen"),
                   ),
-=======
-            ElevatedButton(
-              onPressed: _getImage,
-              child: const Text("Capturar Imagen"),
-            ),
-            const SizedBox(height: 20),
-            Text(result, textAlign: TextAlign.center),
->>>>>>> a816461 (assa)
           ],
         ),
       ),
