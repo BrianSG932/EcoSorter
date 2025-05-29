@@ -12,7 +12,7 @@ from drive_utils import authenticate_drive, download_folder
 
 
 # ID de tu carpeta pública de Google Drive
-FOLDER_ID = '1cBeF91UiYRp50STnbuBymqzsEk4DQNTj'
+FOLDER_ID = '1nOcwfrfLAPzmKzfW56x2O5DV7LmM3iTh'
 DATASET_DIR = 'EntrenamientoML/dataset'
 
 service = authenticate_drive()
