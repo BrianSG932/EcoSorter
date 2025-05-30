@@ -11,8 +11,8 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   late GoogleMapController _controller;
 
-  final LatLng _initialPosition = const LatLng(19.4326, -99.1332); // CDMX
-  final LatLng _recyclingPoint = const LatLng(19.427, -99.145); // Punto alterno
+  final LatLng _initialPosition = const LatLng(23.644900232304753, -100.64795166362644); // CDMX
+  final LatLng _recyclingPoint = const LatLng(23.63881579355342, -100.63919511899142); // Punto alterno
 
   void _goToRecyclingPoint() {
     _controller.animateCamera(
