@@ -1,3 +1,4 @@
+//location: ecosorter_flutter/lib/screens/login_screen.dart
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
