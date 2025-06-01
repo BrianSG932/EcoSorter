@@ -11,6 +11,10 @@ class CameraScreen extends StatefulWidget {
   _CameraScreenState createState() => _CameraScreenState();
 }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> v2.1
 class _CameraScreenState extends State<CameraScreen> {
   final picker = ImagePicker();
   File? _image;
