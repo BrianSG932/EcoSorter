@@ -47,13 +47,8 @@ class _MapScreenState extends State<MapScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _goToRecyclingPoint,
-<<<<<<< HEAD
         tooltip: "Ir al punto de reciclaje",
         child: const Icon(Icons.location_searching),
-=======
-        child: const Icon(Icons.location_searching),
-        tooltip: "Ir al punto de reciclaje",
->>>>>>> v2.1
       ),
     );
   }

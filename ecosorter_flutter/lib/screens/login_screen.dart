@@ -30,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (auth?.idToken != null) {
         final response = await http.post(
-          Uri.parse("https://fantastic-space-trout-5gxvv59ggr46c4r7x-8000.app.github.dev/clasificador/login_google"),
+          Uri.parse("https://fantastic-space-trout-5gxvv59ggr46c4r7x-8000.app.github.dev/auth/google-login"),
           headers: {"Content-Type": "application/json"},
           body: jsonEncode({"token_id": auth!.idToken}),
         );
