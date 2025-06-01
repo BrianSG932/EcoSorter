@@ -1,4 +1,10 @@
+//location: ecosorter_flutter/lib/screens/login_screen.dart
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -7,10 +13,40 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
+
+
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: ['email'],
+  );
+
+  Future<void> _loginWithGoogle() async {
+    try {
+      final account = await _googleSignIn.signIn();
+      final auth = await account?.authentication;
+
+      if (auth?.idToken != null) {
+        final response = await http.post(
+          Uri.parse("https://fantastic-space-trout-5gxvv59ggr46c4r7x-8000.app.github.dev/clasificador/login_google"),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({"token_id": auth!.idToken}),
+        );
+
+        if (response.statusCode == 200) {
+          if (!mounted) return;
+          Navigator.pushNamed(context, '/home');
+        } else {
+          debugPrint("Error en backend: ${response.body}");
+        }
+      }
+    } catch (e) {
+      debugPrint("Error al iniciar sesión con Google: $e");
+    }
+  }
+
 
   @override
   void dispose() {
@@ -89,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 12),
               OutlinedButton.icon(
-                onPressed: () => Navigator.pushNamed(context, '/home'),
+                onPressed: _loginWithGoogle,
                 icon: Image.asset(
                   'assets/images/google_icon.png',
                   height: 24,
