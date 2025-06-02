@@ -1,10 +1,65 @@
-
+//register_screen.dart
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-class RegisterScreen extends StatelessWidget {
+class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
   @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+  
+  Future<void> registerUser(BuildContext context) async {
+    if (_nameController.text.isEmpty ||
+        _emailController.text.isEmpty ||
+        _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Por favor completa todos los campos')),
+      );
+      return;
+    }
+    final nombre = _nameController.text.trim();
+    final correo = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+
+
+    final response = await http.post(
+      Uri.parse('https://fantastic-space-trout-5gxvv59ggr46c4r7x-8000.app.github.dev/auth/register'), 
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'nombre': nombre,
+        'correo': correo,
+        'password': password,
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      Navigator.pushNamed(context, '/welcome');
+    } else {
+      print('Error: ${response.body}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al registrarse')),
+      );
+    }
+  }
+
+  @override
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Crear cuenta')),
@@ -24,6 +79,7 @@ class RegisterScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             TextField(
+              controller: _nameController,
               decoration: InputDecoration(
                 labelText: 'Nombre completo',
                 prefixIcon: Icon(Icons.person),
@@ -32,6 +88,7 @@ class RegisterScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             TextField(
+              controller: _emailController,
               decoration: InputDecoration(
                 labelText: 'Correo electrónico',
                 prefixIcon: Icon(Icons.email),
@@ -40,6 +97,7 @@ class RegisterScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             TextField(
+              controller: _passwordController,
               obscureText: true,
               decoration: InputDecoration(
                 labelText: 'Contraseña',
@@ -49,7 +107,7 @@ class RegisterScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () => Navigator.pushNamed(context, '/welcome'),
+              onPressed: () => registerUser(context),
               child: const Text('Registrarse'),
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size.fromHeight(48),

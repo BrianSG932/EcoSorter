@@ -8,10 +8,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-<<<<<<< HEAD
-=======
-import 'package:ecosorter_flutter/main.dart';
->>>>>>> v2.1
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {

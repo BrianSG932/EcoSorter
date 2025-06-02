@@ -9,6 +9,7 @@ import 'screens/camera_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/history_screen.dart';
 import 'screens/welcome_screen.dart';
+import 'screens/register_screen.dart';
 
 void main() {
   runApp(
@@ -41,6 +42,7 @@ class EcoSorterApp extends StatelessWidget {
         '/profile': (context) => const ProfileScreen(),
         '/history': (context) => const HistoryScreen(),
         '/welcome': (context) => const WelcomeScreen(),
+         '/register': (context) => const RegisterScreen(),
       },
     );
   }
