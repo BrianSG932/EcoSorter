@@ -55,10 +55,35 @@ class _LoginScreenState extends State<LoginScreen> {
     _passwordController.dispose();
     super.dispose();
   }
+  
 
-  void _submit() {
-    if (_formKey.currentState!.validate()) {
-      Navigator.pushNamed(context, '/home');
+  void _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final correo = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    try {
+      final response = await http.post(
+        Uri.parse('https://fantastic-space-trout-5gxvv59ggr46c4r7x-8000.app.github.dev/auth/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'correo': correo, 'password': password}),
+      );
+
+      if (!mounted) return;
+
+      if (response.statusCode == 200) {
+        Navigator.pushNamed(context, '/home');
+      } else {
+        final error = jsonDecode(response.body)['detail'] ?? 'Error desconocido';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $error')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error de conexión: $e')),
+      );
     }
   }
 

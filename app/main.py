@@ -4,6 +4,8 @@ from fastapi import FastAPI
 from app.routes import clasificador
 from app.routes import auth_google
 from app.routes import auth_register
+from app.routes import auth_local
+
 
 app = FastAPI(
     title="EcoSorter API",
@@ -17,6 +19,8 @@ app.include_router(clasificador.router)
 app.include_router(auth_google.router)
 
 app.include_router(auth_register.router)
+
+app.include_router(auth_local.router)
 
 # Ruta principal
 @app.get("/")

@@ -49,9 +49,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
 
     if (response.statusCode == 201) {
+      if (!mounted) return;
       Navigator.pushNamed(context, '/welcome');
     } else {
-      print('Error: ${response.body}');
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error al registrarse')),
       );
