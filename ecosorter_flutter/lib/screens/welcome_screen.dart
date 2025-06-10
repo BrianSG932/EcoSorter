@@ -6,37 +6,32 @@ class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(32.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(
-                'assets/images/logo_ecosorter.png',
-                height: 120,
-              ),
-              const SizedBox(height: 32),
+              const Icon(Icons.verified_user, size: 100, color: Colors.green),
+              const SizedBox(height: 24),
               const Text(
-                '¡Bienvenido a EcoSorter!',
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
-                ),
+                '¡Registro exitoso!',
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               const Text(
-                'Tu cuenta ha sido creada exitosamente. Ahora puedes empezar a clasificar y reciclar de forma inteligente.',
+                'Gracias por unirte a EcoSorter.\nAhora puedes comenzar a clasificar tus residuos y aportar al planeta.',
                 style: TextStyle(fontSize: 16),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: () => Navigator.pushNamedAndRemoveUntil(
-                    context, '/home', (route) => false),
-                child: const Text('Comenzar'),
+              ElevatedButton.icon(
+                onPressed: () =>
+                    Navigator.pushReplacementNamed(context, '/home'),
+                icon: const Icon(Icons.arrow_forward),
+                label: const Text('Ir a Inicio'),
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size.fromHeight(48),
                 ),

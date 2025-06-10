@@ -5,18 +5,30 @@ class HistoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Map<String, String>> history = [
-      {'fecha': '2025-05-22', 'detalle': 'Clasificaste 3 objetos reciclables'},
-      {'fecha': '2025-05-21', 'detalle': 'Iniciaste sesión'},
+    final List<Map<String, dynamic>> history = [
       {
-        'fecha': '2025-05-20',
-        'detalle': 'Registraste un nuevo punto de recolección'
+        'fecha': '2025-05-22 14:30',
+        'detalle': 'Clasificaste una botella de plástico',
+        'imagen': 'assets/images/plastico.png',
+        'ubicacion': 'CDMX, México'
+      },
+      {
+        'fecha': '2025-05-21 10:15',
+        'detalle': 'Clasificaste una lata de aluminio',
+        'imagen': 'assets/images/aluminio.png',
+        'ubicacion': 'Guadalajara, Jalisco'
+      },
+      {
+        'fecha': '2025-05-20 17:45',
+        'detalle': 'Clasificaste una caja de cartón',
+        'imagen': 'assets/images/carton.png',
+        'ubicacion': 'Monterrey, Nuevo León'
       },
     ];
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Historial de Actividad'),
+        title: const Text('Historial de Clasificaciones'),
         centerTitle: true,
       ),
       body: ListView.builder(
@@ -25,10 +37,23 @@ class HistoryScreen extends StatelessWidget {
         itemBuilder: (context, index) {
           final item = history[index];
           return Card(
+            elevation: 3,
+            margin: const EdgeInsets.symmetric(vertical: 8),
             child: ListTile(
-              leading: const Icon(Icons.history),
-              title: Text(item['detalle']!),
-              subtitle: Text('Fecha: ${item['fecha']}'),
+              leading: Image.asset(
+                item['imagen'],
+                width: 50,
+                height: 50,
+                fit: BoxFit.cover,
+              ),
+              title: Text(item['detalle']),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Fecha y hora: ${item['fecha']}'),
+                  Text('Ubicación: ${item['ubicacion']}'),
+                ],
+              ),
             ),
           );
         },

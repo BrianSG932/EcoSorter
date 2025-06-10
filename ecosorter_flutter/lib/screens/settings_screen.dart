@@ -65,6 +65,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
+  Future<void> _abrirAjustesSistema() async {
+    bool opened = await openAppSettings();
+    if (!opened) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudieron abrir los ajustes.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
@@ -156,8 +165,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 if (!serviceEnabled ||
                     permission == LocationPermission.deniedForever) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text("Permiso de ubicación no disponible")),
+                    SnackBar(
+                      content: Text(
+                          "Permiso de ubicación no disponible. Puedes habilitarlo en ajustes."),
+                      action: SnackBarAction(
+                        label: 'Ajustes',
+                        onPressed: _abrirAjustesSistema,
+                      ),
+                    ),
                   );
                   return;
                 }
@@ -199,16 +214,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     title: const Text("Estado de permisos"),
                     content: Column(
                       mainAxisSize: MainAxisSize.min,
-                      children: statuses.entries
-                          .map((e) => Text(
-                              "${e.key.toString().split('.').last}: ${e.value.name}"))
-                          .toList(),
+                      children: statuses.entries.map((e) {
+                        return Text(
+                            "${e.key.toString().split('.').last}: ${e.value.name}");
+                      }).toList(),
                     ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context),
                         child: const Text("Cerrar"),
                       ),
+                      if (statuses.values
+                          .any((status) => status.isPermanentlyDenied))
+                        TextButton(
+                          onPressed: _abrirAjustesSistema,
+                          child: const Text("Abrir ajustes"),
+                        ),
                     ],
                   ),
                 );
